@@ -19,8 +19,9 @@ export default function CmsImage({
 }: CmsImageProps) {
   const srcString = typeof src === "string" ? src : "";
   const proxied = srcString.startsWith("/cms-uploads/");
+  const kitchenOriginal = srcString.startsWith("/kitchens/");
   const remote = /^https?:\/\//.test(srcString);
-  const native = Boolean(srcSet) || proxied || remote;
+  const native = Boolean(srcSet) || proxied || remote || kitchenOriginal;
 
   if (native) {
     return (
@@ -35,6 +36,7 @@ export default function CmsImage({
         fetchPriority={priority ? "high" : "auto"}
         loading={priority ? "eager" : loading ?? "lazy"}
         className={cn(fill && "absolute inset-0 h-full w-full", className)}
+        style={props.style}
       />
     );
   }

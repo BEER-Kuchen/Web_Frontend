@@ -16,9 +16,23 @@ import {
   NavigationMenuIndicator,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { menuPanels } from "@/lib/navigation";
+import { menuPanels, type MenuPanel } from "@/lib/navigation";
 
-export default function MegaMenu() {
+type MegaMenuProps = {
+  panels?: MenuPanel[];
+  ctaLabel?: string;
+  ctaUrl?: string;
+  logoSrc?: string;
+  logoAlt?: string;
+};
+
+export default function MegaMenu({
+  panels = menuPanels,
+  ctaLabel = "Beratung anfragen",
+  ctaUrl = "#beratung",
+  logoSrc,
+  logoAlt,
+}: MegaMenuProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileVisible, setMobileVisible] = useState(false);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
@@ -200,7 +214,7 @@ export default function MegaMenu() {
             onMouseEnter={openMenuHover}
           >
             <NavigationMenuList className="relative h-full items-stretch justify-start space-x-0">
-              {menuPanels.map((panel) => (
+              {panels.map((panel) => (
                 <NavigationMenuItem key={panel.id} value={panel.id} className="flex h-full">
                   <NavigationMenuTrigger className="type-nav relative z-20 h-full whitespace-nowrap rounded-none bg-transparent px-3 !text-[16px] font-normal tracking-[0.06em] text-ink/70 xl:!text-[17px] hover:bg-transparent hover:text-ink focus:bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-ink after:absolute after:inset-x-0 after:top-full after:z-50 after:h-20 after:content-[''] [&>svg]:hidden">
                     {panel.label}
@@ -214,7 +228,7 @@ export default function MegaMenu() {
             </NavigationMenuList>
 
             <div>
-              <BrandLogo />
+              <BrandLogo src={logoSrc} alt={logoAlt} />
             </div>
 
             <div className="flex justify-end">
@@ -224,7 +238,7 @@ export default function MegaMenu() {
                   variant="ghost"
                   className="cta-invert type-nav h-auto rounded-full px-3.5 py-1.5 !text-[16px] font-normal tracking-[0.06em] xl:!text-[17px] hover:bg-ink"
                 >
-                  <Link href="#beratung">Beratung anfragen</Link>
+                  <Link href={ctaUrl}>{ctaLabel}</Link>
                 </Button>
               </div>
             </div>
@@ -258,7 +272,7 @@ export default function MegaMenu() {
               <div className="max-h-[min(80vh,640px)] overflow-y-auto p-6">
                 <div className="flex flex-col justify-between gap-6">
                   <div>
-                    {menuPanels.map((panel) => {
+                    {panels.map((panel) => {
                       const expanded = mobileSection === panel.id;
                       return (
                         <div key={panel.id} className="border-b border-line/80 py-4">
@@ -325,8 +339,8 @@ export default function MegaMenu() {
                     variant="ghost"
                     className="cta-invert type-nav h-auto w-full rounded-full py-3 hover:bg-ink"
                   >
-                    <Link href="#beratung" onClick={closeMobile}>
-                      Beratung anfragen
+                    <Link href={ctaUrl} onClick={closeMobile}>
+                      {ctaLabel}
                     </Link>
                   </Button>
                 </div>
@@ -337,7 +351,11 @@ export default function MegaMenu() {
       </div>
 
       <div className="relative z-10 h-16 w-full lg:hidden">
-        <BrandLogo className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        <BrandLogo
+          src={logoSrc}
+          alt={logoAlt}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        />
         <Button
           size="icon"
           variant="outline"

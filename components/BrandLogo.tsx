@@ -1,21 +1,31 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import CmsImage from "@/components/CmsImage";
 
-export default function BrandLogo({ className }: { className?: string }) {
+export default function BrandLogo({
+  className,
+  src = "/logo.png",
+  alt = "BEER Küchenmanufaktur",
+}: {
+  className?: string;
+  src?: string;
+  alt?: string;
+}) {
   return (
     <Link
       href="/"
       className={cn("flex items-center justify-center", className)}
     >
-      <Image
-        src="/logo.png"
-        alt="BEER Küchenmanufaktur"
-        width={300}
-        height={320}
-        priority
-        className="h-11 w-auto object-contain object-center lg:h-[88px]"
-      />
+      <span className="relative block h-11 w-[41px] lg:h-[88px] lg:w-[82px]">
+        <CmsImage
+          src={src}
+          alt={alt}
+          fill
+          priority
+          sizes="88px"
+          className="object-contain object-center"
+        />
+      </span>
     </Link>
   );
 }

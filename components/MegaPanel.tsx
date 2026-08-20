@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import CmsImage from "@/components/CmsImage";
 import type { MenuLink, MenuPanel } from "@/lib/navigation";
 
 function PanelLink({
@@ -57,16 +57,16 @@ function TeaserStrip({
         <li key={teaser.caption}>
           <Link href={teaser.href} onClick={onNavigate} className="group block">
             <div className="relative aspect-[3/4] overflow-hidden bg-stone">
-              <Image
+              <CmsImage
                 src={teaser.image}
+                srcSet={teaser.srcSet}
                 alt={teaser.alt}
                 fill
                 loading="lazy"
-                quality={90}
                 sizes={
                   single
-                    ? "(max-width: 1024px) 50vw, 24vw"
-                    : "(max-width: 1024px) 40vw, 28vw"
+                    ? "(max-width: 1024px) 80vw, 40vw"
+                    : "(max-width: 1024px) 60vw, 33vw"
                 }
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 style={{ objectPosition: teaser.objectPosition ?? "center" }}

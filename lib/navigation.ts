@@ -12,12 +12,13 @@ export type MenuGroup = {
 export type MenuTeaser = {
   href: string;
   image: string;
+  srcSet?: string;
   caption: string;
   alt: string;
   objectPosition?: string;
 };
 
-export type MenuPanelId = "kuechen" | "moebel" | "planen" | "ueber";
+export type MenuPanelId = string;
 
 export type MenuPanel = {
   id: MenuPanelId;

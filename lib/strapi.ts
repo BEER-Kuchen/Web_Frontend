@@ -1,3 +1,5 @@
+import { menuPanels, type MenuPanel } from "@/lib/navigation";
+
 const FALLBACK_STRAPI_URL =
   "http://strapi-2p2cktq4f2aqoklpusgyfdqt.217.160.8.26.sslip.io";
 
@@ -308,4 +310,137 @@ export async function fetchHomeCms() {
   ]);
 
   return { heroSlides, kacheln, entdecken };
+}
+
+export type HeaderCms = {
+  logo: string;
+  logoAlt: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  panels: MenuPanel[];
+};
+
+type StrapiMenuLink = {
+  label?: string;
+  url?: string;
+  highlight?: boolean;
+};
+
+type StrapiMenuGroup = {
+  title?: string | null;
+  links?: StrapiMenuLink[];
+};
+
+type StrapiMenuTeaser = {
+  caption?: string;
+  alt?: string;
+  url?: string;
+  image?: StrapiMedia;
+};
+
+type StrapiHeaderMenu = {
+  documentId?: string;
+  label?: string;
+  title?: string;
+  url?: string;
+  variant?: MenuPanel["variant"];
+  intro?: string;
+  order?: number;
+  groups?: StrapiMenuGroup[];
+  teasers?: StrapiMenuTeaser[];
+};
+
+type StrapiHeaderEntry = {
+  logo?: StrapiMedia;
+  logoAlt?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+};
+
+function slugify(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "menu"
+  );
+}
+
+function mapHeaderMenus(menus: StrapiHeaderMenu[]): MenuPanel[] {
+  const fallbackByLabel = new Map(
+    menuPanels.map((panel) => [panel.label, panel]),
+  );
+
+  return menus
+    .map((menu) => {
+      const label = menu.label?.trim() || "";
+      const fallback = fallbackByLabel.get(label);
+      const teasers = (menu.teasers ?? [])
+        .map((teaser) => {
+          const image = strapiResponsiveImage(teaser.image);
+          return {
+            href: teaser.url?.trim() || "#",
+            image: strapiMediaUrl(teaser.image?.url) || image.src,
+            srcSet: image.srcSet,
+            caption: teaser.caption?.trim() || "",
+            alt: teaser.alt?.trim() || teaser.caption?.trim() || "",
+          };
+        })
+        .filter((teaser) => teaser.caption && teaser.image);
+
+      return {
+        id: slugify(label) || menu.documentId || "menu",
+        label,
+        title: menu.title?.trim() || label,
+        href: menu.url?.trim() || fallback?.href || "#",
+        variant: menu.variant ?? fallback?.variant ?? "slim",
+        intro: menu.intro?.trim() || fallback?.intro || "",
+        groups: (menu.groups ?? [])
+          .map((group) => ({
+            title: group.title?.trim() || undefined,
+            links: (group.links ?? [])
+              .map((link) => ({
+                label: link.label?.trim() || "",
+                href: link.url?.trim() || "#",
+                highlight: Boolean(link.highlight),
+              }))
+              .filter((link) => link.label),
+          }))
+          .filter((group) => group.links.length > 0),
+        teasers: teasers.length > 0 ? teasers : fallback?.teasers,
+      } satisfies MenuPanel;
+    })
+    .filter((panel) => panel.label && panel.groups.length > 0);
+}
+
+export async function fetchHeader(): Promise<HeaderCms | null> {
+  const [headerPayload, menuPayload] = await Promise.all([
+    strapiGet<{ data?: StrapiHeaderEntry[] }>("/api/headers", {
+      populate: "logo",
+    }),
+    strapiGet<{ data?: StrapiHeaderMenu[] }>("/api/header-menus", {
+      sort: "order:asc",
+      "populate[groups][populate]": "links",
+      "populate[teasers][populate]": "image",
+    }),
+  ]);
+
+  const header = headerPayload?.data?.[0];
+  const panels = mapHeaderMenus(menuPayload?.data ?? []);
+
+  if (!header && panels.length === 0) {
+    return null;
+  }
+
+  const logo = strapiMediaUrl(header?.logo?.url);
+
+  return {
+    logo,
+    logoAlt: header?.logoAlt?.trim() || "BEER Küchenmanufaktur",
+    ctaLabel: header?.ctaLabel?.trim() || "Beratung anfragen",
+    ctaUrl: header?.ctaUrl?.trim() || "#beratung",
+    panels: panels.length > 0 ? panels : menuPanels,
+  };
 }
