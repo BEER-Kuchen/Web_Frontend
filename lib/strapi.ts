@@ -7,6 +7,9 @@ export const STRAPI_URL = (
   FALLBACK_STRAPI_URL
 ).replace(/\/$/, "");
 
+const STRAPI_HOST = new URL(STRAPI_URL).hostname;
+const CMS_UPLOAD_PREFIX = "/cms-uploads";
+
 const FETCH_TIMEOUT_MS = 4000;
 const REVALIDATE_SECONDS = 120;
 
@@ -101,7 +104,23 @@ export function strapiMediaUrl(url?: string | null) {
   }
 
   if (url.startsWith("http://") || url.startsWith("https://")) {
+    try {
+      const parsed = new URL(url);
+      if (
+        parsed.hostname === STRAPI_HOST &&
+        parsed.pathname.startsWith("/uploads/")
+      ) {
+        return `${CMS_UPLOAD_PREFIX}${parsed.pathname.slice("/uploads".length)}`;
+      }
+    } catch {
+      return url;
+    }
+
     return url;
+  }
+
+  if (url.startsWith("/uploads/")) {
+    return `${CMS_UPLOAD_PREFIX}${url.slice("/uploads".length)}`;
   }
 
   return `${STRAPI_URL}${url}`;

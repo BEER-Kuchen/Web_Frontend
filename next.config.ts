@@ -6,10 +6,6 @@ const strapiUrl =
   "http://strapi-2p2cktq4f2aqoklpusgyfdqt.217.160.8.26.sslip.io";
 
 const strapiHost = new URL(strapiUrl).hostname;
-const strapiProtocol = new URL(strapiUrl).protocol.replace(
-  ":",
-  "",
-) as "http" | "https";
 
 const nextConfig: NextConfig = {
   images: {
@@ -17,11 +13,24 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24,
     remotePatterns: [
       {
-        protocol: strapiProtocol,
+        protocol: "http",
+        hostname: strapiHost,
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
         hostname: strapiHost,
         pathname: "/uploads/**",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/cms-uploads/:path*",
+        destination: `${strapiUrl.replace(/\/$/, "")}/uploads/:path*`,
+      },
+    ];
   },
 };
 

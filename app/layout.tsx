@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="de" className={`${figtree.variable} ${cormorant.variable}`}>
-      <body className="font-sans antialiased">
+      <body className={`${figtree.className} antialiased`}>
         <SmoothScroll />
         {children}
       </body>
