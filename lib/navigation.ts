@@ -92,6 +92,15 @@ export const menuPanels: MenuPanel[] = [
         ],
       },
     ],
+    teasers: [
+      {
+        href: "#manufaktur",
+        image: "/kitchens/stile-holz.jpg",
+        caption: "Möbel nach Maß",
+        alt: "Eingebaute Möbel aus Holz, präzise nach Maß gefertigt",
+        objectPosition: "center 40%",
+      },
+    ],
   },
   {
     id: "planen",
@@ -122,6 +131,15 @@ export const menuPanels: MenuPanel[] = [
         ],
       },
     ],
+    teasers: [
+      {
+        href: "#beratung",
+        image: "/kitchens/stile-insel.jpg",
+        caption: "Küche planen",
+        alt: "Kücheninsel in der Ausstellung – der Weg zur eigenen Planung",
+        objectPosition: "center 38%",
+      },
+    ],
   },
   {
     id: "ueber",
@@ -140,6 +158,15 @@ export const menuPanels: MenuPanel[] = [
           { href: "#manufaktur", label: "Empfehlungen" },
           { href: "#beratung", label: "Karriere" },
         ],
+      },
+    ],
+    teasers: [
+      {
+        href: "#manufaktur",
+        image: "/kitchens/stile-purist.jpg",
+        caption: "Über BEER",
+        alt: "Puristische Manufakturküche – Haltung und Handwerk bei BEER",
+        objectPosition: "center 42%",
       },
     ],
   },

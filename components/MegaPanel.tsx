@@ -43,8 +43,16 @@ function TeaserStrip({
     return null;
   }
 
+  const single = panel.teasers.length === 1;
+
   return (
-    <ul className="grid grid-cols-3 items-start gap-4 lg:gap-6">
+    <ul
+      className={
+        single
+          ? "max-w-sm"
+          : "grid grid-cols-3 items-start gap-4 lg:gap-6"
+      }
+    >
       {panel.teasers.map((teaser) => (
         <li key={teaser.caption}>
           <Link href={teaser.href} onClick={onNavigate} className="group block">
@@ -55,7 +63,11 @@ function TeaserStrip({
                 fill
                 loading="lazy"
                 quality={90}
-                sizes="(max-width: 1024px) 40vw, 28vw"
+                sizes={
+                  single
+                    ? "(max-width: 1024px) 50vw, 24vw"
+                    : "(max-width: 1024px) 40vw, 28vw"
+                }
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 style={{ objectPosition: teaser.objectPosition ?? "center" }}
               />
@@ -77,18 +89,19 @@ export default function MegaPanel({
 }) {
   const primary = panel.groups[0];
   const secondary = panel.groups[1];
+  const hasTeasers = Boolean(panel.teasers?.length);
 
   return (
     <div className="bg-transparent">
       <div className="mx-auto w-full max-w-[90rem] px-8 pb-12 pt-5 md:pb-14 md:pt-6 lg:px-10">
         <div
           className={
-            panel.variant === "rich"
+            hasTeasers
               ? "grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-12"
               : "max-w-xl"
           }
         >
-          <div className={panel.variant === "rich" ? "lg:col-span-5" : undefined}>
+          <div className={hasTeasers ? "lg:col-span-5" : undefined}>
             <p className="type-intro max-w-md text-muted">{panel.intro}</p>
 
             {primary ? (
@@ -121,7 +134,7 @@ export default function MegaPanel({
             ) : null}
           </div>
 
-          {panel.variant === "rich" ? (
+          {hasTeasers ? (
             <div className="lg:col-span-7">
               <TeaserStrip panel={panel} onNavigate={onNavigate} />
             </div>
