@@ -1,0 +1,314 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+
+  --color-paper: #fdfcfa;
+  --color-karte: #f7f5f1;
+  --color-stone: #f7f5f1;
+  --color-ink: #141414;
+  --color-nacht: #131311;
+  --color-espresso: #3b322a;
+  --color-bronze-tafel: #c2a483;
+  --color-muted: #4a4a46;
+  --color-sage: #9eae92;
+  --color-line: #e5e1da;
+  --color-gold: #a17a4a;
+  --color-bronze: #a17a4a;
+  --color-bronze-dark: #8a6437;
+  --color-messing: #c8a87e;
+  --color-gold-soft: #f0e8dc;
+  --color-cream: #f0e8dc;
+
+  --color-background: #fdfcfa;
+  --color-foreground: #141414;
+  --color-border: #e5e1da;
+  --color-input: #e5e1da;
+  --color-ring: #a17a4a;
+  --color-accent: #f0e8dc;
+  --color-accent-foreground: #141414;
+  --color-popover: #fdfcfa;
+  --color-popover-foreground: #141414;
+  --color-primary: #a17a4a;
+  --color-primary-foreground: #fdfcfa;
+  --color-secondary: #f7f5f1;
+  --color-secondary-foreground: #141414;
+  --color-destructive: #8d1d2c;
+  --color-destructive-foreground: #fdfcfa;
+}
+
+html {
+  scroll-padding-top: 6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-muted);
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* VI Typografie — only Cormorant Garamond + Figtree */
+@layer components {
+  .type-h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+  }
+
+  .type-h1 em {
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .type-h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+  }
+
+  .type-h3 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+
+  .type-panel {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.25;
+    color: var(--color-ink);
+  }
+
+  .type-quote {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--color-ink);
+  }
+
+  .type-eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  .type-body {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+
+  .type-intro {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  .type-nav {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+  }
+
+  @media (min-width: 768px) {
+    .type-h1 {
+      font-size: 64px;
+    }
+
+    .type-h2 {
+      font-size: 42px;
+    }
+
+    .type-h3 {
+      font-size: 32px;
+    }
+
+    .type-panel {
+      font-size: 30px;
+    }
+
+    .type-quote {
+      font-size: 28px;
+    }
+
+    .type-eyebrow {
+      font-size: 13px;
+    }
+
+    .type-body {
+      font-size: 18px;
+    }
+
+    .type-intro {
+      font-size: 20px;
+    }
+
+    .type-nav {
+      font-size: 19px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .type-h1 {
+      font-size: 72px;
+    }
+
+    .type-h2 {
+      font-size: 48px;
+    }
+
+    .type-panel {
+      font-size: 34px;
+    }
+
+    .type-nav {
+      font-size: 21px;
+    }
+  }
+
+  /* VII Komponenten */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.95rem 1.85rem;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .pill-primary {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border: 1px solid var(--color-ink);
+  }
+
+  .pill-primary:hover {
+    background: var(--color-nacht);
+    border-color: var(--color-nacht);
+  }
+
+  .pill-secondary {
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+  }
+
+  .pill-secondary:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .pill-ghost-dark {
+    background: transparent;
+    color: var(--color-paper);
+    border: 1px solid var(--color-paper);
+  }
+
+  .pill-ghost-dark:hover {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  .pill-light {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--color-paper);
+  }
+
+  .pill-light:hover {
+    background: transparent;
+    color: var(--color-paper);
+  }
+
+  .cta-invert {
+    overflow: hidden;
+    border: 1px solid var(--color-ink);
+    background-color: var(--color-ink);
+    background-image: linear-gradient(var(--color-paper), var(--color-paper));
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    background-position: left center;
+    color: var(--color-paper);
+    transition:
+      background-size 0.45s cubic-bezier(0.45, 0.02, 0.2, 1),
+      color 0.45s cubic-bezier(0.45, 0.02, 0.2, 1);
+  }
+
+  .cta-invert:hover,
+  .cta-invert:focus-visible {
+    background-size: 100% 100%;
+    color: var(--color-ink);
+  }
+
+  .text-link {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+  }
+
+  .text-link:hover {
+    color: var(--color-ink);
+  }
+
+  .text-link-dark {
+    color: var(--color-paper);
+  }
+
+  .text-link-dark:hover {
+    color: var(--color-paper);
+  }
+}
