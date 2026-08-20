@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { Cormorant_Garamond, Figtree } from "next/font/google";
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
-
-const SmoothScroll = dynamic(() => import("@/components/SmoothScroll"), {
-  ssr: false,
-});
 
 const figtree = Figtree({
   subsets: ["latin"],
