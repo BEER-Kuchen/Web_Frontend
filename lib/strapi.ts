@@ -15,6 +15,7 @@ const REVALIDATE_SECONDS = 120;
 
 export type HeroSlide = {
   src: string;
+  srcSet?: string;
   alt: string;
 };
 
@@ -22,6 +23,7 @@ export type KachelTile = {
   title: string;
   href: string;
   image: string;
+  srcSet?: string;
   alt: string;
   color: string;
 };
@@ -38,6 +40,7 @@ export type EntdeckenPanel = {
   buttonLabel: string;
   href: string;
   image: string;
+  srcSet?: string;
   alt: string;
 };
 
@@ -45,12 +48,18 @@ export type EntdeckenContent = {
   panels: EntdeckenPanel[];
 };
 
+type StrapiFormat = {
+  url?: string;
+  width?: number;
+};
+
 type StrapiMedia = {
   url?: string;
+  width?: number;
   formats?: {
-    large?: { url?: string };
-    medium?: { url?: string };
-    small?: { url?: string };
+    large?: StrapiFormat;
+    medium?: StrapiFormat;
+    small?: StrapiFormat;
   };
 };
 
@@ -144,6 +153,41 @@ export function strapiImageUrl(
   return strapiMediaUrl(url);
 }
 
+export function strapiResponsiveImage(image?: StrapiMedia | null) {
+  const src = strapiImageUrl(image, "large") || strapiMediaUrl(image?.url);
+  if (!src) {
+    return { src: "", srcSet: undefined as string | undefined };
+  }
+
+  const candidates: { url: string; width: number }[] = [];
+  const add = (url?: string, width?: number, fallbackWidth?: number) => {
+    const mapped = strapiMediaUrl(url);
+    const resolvedWidth = width || fallbackWidth;
+    if (!mapped || !resolvedWidth) {
+      return;
+    }
+    if (candidates.some((item) => item.url === mapped)) {
+      return;
+    }
+    candidates.push({ url: mapped, width: resolvedWidth });
+  };
+
+  add(image?.formats?.small?.url, image?.formats?.small?.width, 500);
+  add(image?.formats?.medium?.url, image?.formats?.medium?.width, 750);
+  add(image?.formats?.large?.url, image?.formats?.large?.width, 1000);
+  add(image?.url, image?.width, 2400);
+
+  candidates.sort((left, right) => left.width - right.width);
+
+  return {
+    src,
+    srcSet:
+      candidates.length > 1
+        ? candidates.map((item) => `${item.url} ${item.width}w`).join(", ")
+        : undefined,
+  };
+}
+
 async function strapiGet<T>(path: string, query: Record<string, string>) {
   const url = new URL(path, `${STRAPI_URL}/`);
   for (const [key, value] of Object.entries(query)) {
@@ -177,10 +221,14 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
   });
 
   return (payload?.data?.slides ?? [])
-    .map((slide) => ({
-      src: strapiImageUrl(slide.image, "original"),
-      alt: slide.alt?.trim() || "",
-    }))
+    .map((slide) => {
+      const image = strapiResponsiveImage(slide.image);
+      return {
+        src: image.src,
+        srcSet: image.srcSet,
+        alt: slide.alt?.trim() || "",
+      };
+    })
     .filter((slide) => slide.src);
 }
 
@@ -198,13 +246,17 @@ export async function fetchKacheln(): Promise<KachelnContent | null> {
   }
 
   const colors = (payload.data.colors ?? [])
-    .map((tile) => ({
-      title: tile.title?.trim() || "",
-      href: tile.href?.trim() || "#kacheln",
-      image: strapiImageUrl(tile.image, "original"),
-      alt: tile.alt?.trim() || tile.title?.trim() || "",
-      color: tile.color?.trim() || "",
-    }))
+    .map((tile) => {
+      const image = strapiResponsiveImage(tile.image);
+      return {
+        title: tile.title?.trim() || "",
+        href: tile.href?.trim() || "#kacheln",
+        image: image.src,
+        srcSet: image.srcSet,
+        alt: tile.alt?.trim() || tile.title?.trim() || "",
+        color: tile.color?.trim() || "",
+      };
+    })
     .filter((tile) => tile.title && tile.image && isHexColor(tile.color));
 
   if (colors.length === 0) {
@@ -227,14 +279,18 @@ export async function fetchEntdecken(): Promise<EntdeckenContent | null> {
   });
 
   const panels = (payload?.data?.panels ?? [])
-    .map((panel) => ({
-      title: panel.title?.trim() || "",
-      subtitle: panel.subtitle?.trim() || "",
-      buttonLabel: panel.buttonLabel?.trim() || "Entdecken",
-      href: panel.href?.trim() || "#entdecken",
-      image: strapiImageUrl(panel.image, "original"),
-      alt: panel.alt?.trim() || panel.title?.trim() || "",
-    }))
+    .map((panel) => {
+      const image = strapiResponsiveImage(panel.image);
+      return {
+        title: panel.title?.trim() || "",
+        subtitle: panel.subtitle?.trim() || "",
+        buttonLabel: panel.buttonLabel?.trim() || "Entdecken",
+        href: panel.href?.trim() || "#entdecken",
+        image: image.src,
+        srcSet: image.srcSet,
+        alt: panel.alt?.trim() || panel.title?.trim() || "",
+      };
+    })
     .filter((panel) => panel.title && panel.subtitle);
 
   if (panels.length === 0) {

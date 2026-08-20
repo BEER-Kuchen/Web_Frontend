@@ -53,6 +53,7 @@ function TeaserStrip({
                 src={teaser.image}
                 alt={teaser.alt}
                 fill
+                loading="lazy"
                 quality={90}
                 sizes="(max-width: 1024px) 40vw, 28vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"

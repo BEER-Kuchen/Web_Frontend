@@ -1,14 +1,53 @@
 import Image, { type ImageProps } from "next/image";
+import { cn } from "@/lib/utils";
 
-export default function CmsImage({ src, alt, ...props }: ImageProps) {
-  const proxied = typeof src === "string" && src.startsWith("/cms-uploads/");
-  const remote = typeof src === "string" && /^https?:\/\//.test(src);
+type CmsImageProps = ImageProps & {
+  srcSet?: string;
+};
+
+export default function CmsImage({
+  src,
+  alt,
+  srcSet,
+  className,
+  fill,
+  priority,
+  loading,
+  sizes,
+  quality: _quality,
+  ...props
+}: CmsImageProps) {
+  const srcString = typeof src === "string" ? src : "";
+  const proxied = srcString.startsWith("/cms-uploads/");
+  const remote = /^https?:\/\//.test(srcString);
+  const native = Boolean(srcSet) || proxied || remote;
+
+  if (native) {
+    return (
+      // Native img keeps srcset working for Strapi derivatives without the optimizer timeout.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={srcString}
+        srcSet={srcSet}
+        sizes={typeof sizes === "string" ? sizes : undefined}
+        alt={alt}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
+        loading={priority ? "eager" : loading ?? "lazy"}
+        className={cn(fill && "absolute inset-0 h-full w-full", className)}
+      />
+    );
+  }
 
   return (
     <Image
       src={src}
       alt={alt}
-      unoptimized={remote || proxied}
+      fill={fill}
+      priority={priority}
+      loading={loading}
+      sizes={sizes}
+      className={className}
       {...props}
     />
   );

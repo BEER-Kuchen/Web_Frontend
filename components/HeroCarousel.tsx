@@ -7,6 +7,18 @@ import type { HeroSlide } from "@/lib/strapi";
 const DWELL_MS = 3500;
 const ROLL_MS = 1200;
 
+function shouldLoadImage(slideIndex: number, index: number, count: number) {
+  if (slideIndex === 0) {
+    return true;
+  }
+
+  if (Math.abs(slideIndex - index) <= 1) {
+    return true;
+  }
+
+  return index === count && slideIndex <= 1;
+}
+
 export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const [animate, setAnimate] = useState(true);
@@ -66,24 +78,30 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             : "none",
         }}
       >
-        {track.map((slide, slideIndex) => (
-          <div
-            key={`${slide.src}-${slideIndex}`}
-            className="relative h-full w-full min-w-full shrink-0"
-            aria-hidden={slideIndex !== index}
-          >
-            <CmsImage
-              src={slide.src}
-              alt={slide.alt}
-              fill
-              priority={slideIndex === 0}
-              loading={slideIndex === 0 ? "eager" : "lazy"}
-              quality={90}
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-          </div>
-        ))}
+        {track.map((slide, slideIndex) => {
+          const load = shouldLoadImage(slideIndex, index, slides.length);
+
+          return (
+            <div
+              key={`${slide.src}-${slideIndex}`}
+              className="relative h-full w-full min-w-full shrink-0 bg-nacht"
+              aria-hidden={slideIndex !== index}
+            >
+              {load ? (
+                <CmsImage
+                  src={slide.src}
+                  srcSet={slide.srcSet}
+                  alt={slide.alt}
+                  fill
+                  priority={slideIndex === 0}
+                  loading={slideIndex === 0 ? "eager" : "lazy"}
+                  sizes="100vw"
+                  className="object-cover object-center"
+                />
+              ) : null}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

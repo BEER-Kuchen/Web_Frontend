@@ -29,7 +29,23 @@ const fallbackSlides: HeroSlide[] = [
 ];
 
 export default function Hero({ slides }: { slides: HeroSlide[] }) {
+  const items = slides.length > 0 ? slides : fallbackSlides;
+  const first = items[0];
+
   return (
-    <HeroCarousel slides={slides.length > 0 ? slides : fallbackSlides} />
+    <>
+      {first ? (
+        <link
+          rel="preload"
+          as="image"
+          href={first.src}
+          {...(first.srcSet
+            ? { imageSrcSet: first.srcSet, imageSizes: "100vw" }
+            : {})}
+          fetchPriority="high"
+        />
+      ) : null}
+      <HeroCarousel slides={items} />
+    </>
   );
 }

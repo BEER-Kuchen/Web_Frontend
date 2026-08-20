@@ -46,8 +46,10 @@ function PanelCard({ panel }: { panel: EntdeckenPanel }) {
         {panel.image ? (
           <CmsImage
             src={panel.image}
+            srcSet={panel.srcSet}
             alt={panel.alt || panel.title}
             fill
+            loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1152px) 50vw, 560px"
             className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />

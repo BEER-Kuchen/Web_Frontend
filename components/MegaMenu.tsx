@@ -20,6 +20,7 @@ import { menuPanels } from "@/lib/navigation";
 
 export default function MegaMenu() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileVisible, setMobileVisible] = useState(false);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function MegaMenu() {
   const panelId = useId();
   const leaveTimer = useRef<number>(0);
   const closeDropdownTimer = useRef<number>(0);
+  const closeMobileTimer = useRef<number>(0);
   const menuValueRef = useRef(menuValue);
   const sheetWasOpen = useRef(false);
   menuValueRef.current = menuValue;
@@ -39,6 +41,11 @@ export default function MegaMenu() {
   const panelExpanded = dropdownOpen || (!solid && Boolean(menuValue));
   const panelInstant = panelExpanded && solid && !sheetWasOpen.current;
   const panelEase = panelExpanded
+    ? "ease-[cubic-bezier(0.22,1,0.36,1)]"
+    : "ease-[cubic-bezier(0.64,0,0.78,0)]";
+  const mobileExpanded = mobileOpen || (!solid && mobileVisible);
+  const mobileInstant = mobileExpanded && solid && !sheetWasOpen.current;
+  const mobileEase = mobileExpanded
     ? "ease-[cubic-bezier(0.22,1,0.36,1)]"
     : "ease-[cubic-bezier(0.64,0,0.78,0)]";
 
@@ -94,13 +101,32 @@ export default function MegaMenu() {
     return () => {
       window.clearTimeout(leaveTimer.current);
       window.clearTimeout(closeDropdownTimer.current);
+      window.clearTimeout(closeMobileTimer.current);
     };
+  }, []);
+
+  const openMobile = useCallback(() => {
+    window.clearTimeout(closeMobileTimer.current);
+    setMobileOpen(true);
+    setMobileVisible(true);
   }, []);
 
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
-    setMobileSection(null);
+    window.clearTimeout(closeMobileTimer.current);
+    closeMobileTimer.current = window.setTimeout(() => {
+      setMobileVisible(false);
+      setMobileSection(null);
+    }, 500);
   }, []);
+
+  const toggleMobile = useCallback(() => {
+    if (mobileOpen) {
+      closeMobile();
+    } else {
+      openMobile();
+    }
+  }, [mobileOpen, closeMobile, openMobile]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -207,17 +233,106 @@ export default function MegaMenu() {
       </NavigationMenu>
 
       <div
-        aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 z-0 grid origin-top bg-white transition-[grid-template-rows,box-shadow] duration-500 lg:hidden",
+          "absolute inset-x-0 top-0 z-0 grid origin-top bg-white transition-[grid-template-rows,box-shadow] duration-500 lg:hidden",
           sheetEase,
           solid
-            ? "grid-rows-[1fr] shadow-[0_18px_40px_rgba(17,17,17,0.08)]"
-            : "grid-rows-[0fr] shadow-none",
+            ? "pointer-events-auto grid-rows-[1fr] shadow-[0_18px_40px_rgba(17,17,17,0.08)]"
+            : "pointer-events-none grid-rows-[0fr] shadow-none",
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="h-16" />
+          <div className="h-16" aria-hidden />
+          <div
+            className={cn(
+              "grid transition-[grid-template-rows] duration-500",
+              mobileEase,
+              mobileExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+              mobileInstant && "duration-0",
+            )}
+          >
+            <div
+              id={`${panelId}-mobile`}
+              className="min-h-0 overflow-hidden bg-white"
+            >
+              <div className="max-h-[min(80vh,640px)] overflow-y-auto p-6">
+                <div className="flex flex-col justify-between gap-6">
+                  <div>
+                    {menuPanels.map((panel) => {
+                      const expanded = mobileSection === panel.id;
+                      return (
+                        <div key={panel.id} className="border-b border-line/80 py-4">
+                          <button
+                            type="button"
+                            className="flex w-full items-center justify-between px-2 py-1 text-left"
+                            aria-expanded={expanded}
+                            onClick={() =>
+                              setMobileSection((current) =>
+                                current === panel.id ? null : panel.id,
+                              )
+                            }
+                          >
+                            <span className="type-h2 text-ink">{panel.label}</span>
+                            <span className="text-muted" aria-hidden="true">
+                              {expanded ? "–" : "+"}
+                            </span>
+                          </button>
+                          <div
+                            className={cn(
+                              "grid transition-[grid-template-rows] duration-500",
+                              expanded
+                                ? "grid-rows-[1fr] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                : "grid-rows-[0fr] ease-[cubic-bezier(0.64,0,0.78,0)]",
+                            )}
+                          >
+                            <ul className="min-h-0 space-y-3 overflow-hidden">
+                              <li className="pt-4">
+                                <Link
+                                  href={panel.href}
+                                  onClick={closeMobile}
+                                  className="type-body text-ink"
+                                >
+                                  Übersicht
+                                </Link>
+                              </li>
+                              {panel.groups.flatMap((group) =>
+                                group.links.map((link) => (
+                                  <li
+                                    key={`${group.title ?? "links"}-${link.label}`}
+                                  >
+                                    <Link
+                                      href={link.href}
+                                      onClick={closeMobile}
+                                      className={`type-body ${
+                                        link.highlight
+                                          ? "text-ink"
+                                          : "text-ink/80"
+                                      }`}
+                                    >
+                                      {link.label}
+                                    </Link>
+                                  </li>
+                                )),
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="cta-invert type-nav h-auto w-full rounded-full py-3 hover:bg-ink"
+                  >
+                    <Link href="#beratung" onClick={closeMobile}>
+                      Beratung anfragen
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -226,95 +341,15 @@ export default function MegaMenu() {
         <Button
           size="icon"
           variant="outline"
-          onClick={() => setMobileOpen((open) => !open)}
+          onClick={toggleMobile}
           className="absolute top-1/2 right-5 -translate-y-1/2 border-line bg-transparent"
           aria-expanded={mobileOpen}
           aria-controls={`${panelId}-mobile`}
           aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
         >
-          <MenuToggleIcon open={mobileOpen} className="size-5" duration={300} />
+          <MenuToggleIcon open={mobileOpen} className="size-5" duration={500} />
         </Button>
       </div>
-
-      {mobileOpen ? (
-        <div
-          id={`${panelId}-mobile`}
-          className="absolute inset-x-0 top-full z-40 origin-top overflow-hidden border-b border-border bg-white duration-500 animate-in fade-in-0 slide-in-from-top-4 lg:hidden"
-        >
-          <div
-            data-slot="open"
-            className="data-[slot=open]:animate-in data-[slot=open]:zoom-in-97 max-h-[min(80vh,640px)] overflow-y-auto p-6 ease-out"
-          >
-            <div className="flex flex-col justify-between gap-6">
-              <div>
-                {menuPanels.map((panel) => {
-                  const expanded = mobileSection === panel.id;
-                  return (
-                    <div key={panel.id} className="border-b border-line/80 py-4">
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-between px-2 py-1 text-left"
-                        aria-expanded={expanded}
-                        onClick={() =>
-                          setMobileSection((current) =>
-                            current === panel.id ? null : panel.id,
-                          )
-                        }
-                      >
-                        <span className="type-h2 text-ink">{panel.label}</span>
-                        <span className="text-muted" aria-hidden="true">
-                          {expanded ? "–" : "+"}
-                        </span>
-                      </button>
-                      {expanded ? (
-                        <ul className="mt-4 space-y-3 pb-2">
-                          <li>
-                            <Link
-                              href={panel.href}
-                              onClick={closeMobile}
-                              className="type-body text-ink"
-                            >
-                              Übersicht
-                            </Link>
-                          </li>
-                          {panel.groups.flatMap((group) =>
-                            group.links.map((link) => (
-                              <li
-                                key={`${group.title ?? "links"}-${link.label}`}
-                              >
-                                <Link
-                                  href={link.href}
-                                  onClick={closeMobile}
-                                  className={`type-body ${
-                                    link.highlight
-                                      ? "text-ink"
-                                      : "text-ink/80"
-                                  }`}
-                                >
-                                  {link.label}
-                                </Link>
-                              </li>
-                            )),
-                          )}
-                        </ul>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-              <Button
-                asChild
-                variant="ghost"
-                className="cta-invert type-nav h-auto w-full rounded-full py-3 hover:bg-ink"
-              >
-                <Link href="#beratung" onClick={closeMobile}>
-                  Beratung anfragen
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ const strapiUrl =
 const strapiHost = new URL(strapiUrl).hostname;
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   images: {
     qualities: [75, 90],
     minimumCacheTTL: 60 * 60 * 24,
@@ -23,6 +24,28 @@ const nextConfig: NextConfig = {
         pathname: "/uploads/**",
       },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/cms-uploads/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/kitchens/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
   async rewrites() {
     return [
