@@ -11,6 +11,8 @@ export const STRAPI_URL = (
 
 const STRAPI_HOST = new URL(STRAPI_URL).hostname;
 const CMS_UPLOAD_PREFIX = "/cms-uploads";
+const CMS_OPT_PREFIX = "/cms-opt";
+const OPT_WIDTHS = [1280, 1600, 1920, 2560, 3840];
 
 const FETCH_TIMEOUT_MS = 4000;
 const REVALIDATE_SECONDS = 120;
@@ -155,14 +157,28 @@ export function strapiImageUrl(
   return strapiMediaUrl(url);
 }
 
-const MAX_SRCSET_WIDTH = 1920;
+function cmsOptUrl(originalUrl: string, width: number) {
+  if (!originalUrl.startsWith(`${CMS_UPLOAD_PREFIX}/`)) {
+    return "";
+  }
 
-export function strapiResponsiveImage(image?: StrapiMedia | null) {
+  return `${CMS_OPT_PREFIX}/${width}/${originalUrl.slice(CMS_UPLOAD_PREFIX.length + 1)}`;
+}
+
+export function strapiResponsiveImage(
+  image?: StrapiMedia | null,
+  options?: { srcWidth?: number },
+) {
+  const srcWidth = options?.srcWidth ?? 1920;
+  const originalUrl = strapiMediaUrl(image?.url);
+  const originalWidth = image?.width;
   const candidates: { url: string; width: number }[] = [];
   const add = (url?: string, width?: number, fallbackWidth?: number) => {
-    const mapped = strapiMediaUrl(url);
+    const mapped = url?.startsWith("/") || url?.startsWith("http")
+      ? url
+      : strapiMediaUrl(url);
     const resolvedWidth = width || fallbackWidth;
-    if (!mapped || !resolvedWidth || resolvedWidth > MAX_SRCSET_WIDTH) {
+    if (!mapped || !resolvedWidth) {
       return;
     }
     if (candidates.some((item) => item.url === mapped)) {
@@ -171,17 +187,27 @@ export function strapiResponsiveImage(image?: StrapiMedia | null) {
     candidates.push({ url: mapped, width: resolvedWidth });
   };
 
-  add(image?.formats?.small?.url, image?.formats?.small?.width, 500);
-  add(image?.formats?.medium?.url, image?.formats?.medium?.width, 750);
-  add(image?.formats?.large?.url, image?.formats?.large?.width, 1000);
-  add(image?.url, image?.width);
+  add(strapiMediaUrl(image?.formats?.small?.url), image?.formats?.small?.width, 500);
+  add(strapiMediaUrl(image?.formats?.medium?.url), image?.formats?.medium?.width, 750);
+  add(strapiMediaUrl(image?.formats?.large?.url), image?.formats?.large?.width, 1000);
+
+  if (originalUrl && originalWidth) {
+    if (originalWidth <= 1920) {
+      add(originalUrl, originalWidth);
+    } else {
+      for (const width of OPT_WIDTHS) {
+        if (width <= originalWidth) {
+          add(cmsOptUrl(originalUrl, width), width);
+        }
+      }
+    }
+  }
 
   candidates.sort((left, right) => left.width - right.width);
 
-  const src =
-    strapiImageUrl(image, "large") ||
-    candidates.at(-1)?.url ||
-    "";
+  const preferred =
+    candidates.find((item) => item.width >= srcWidth) ?? candidates.at(-1);
+  const src = preferred?.url || "";
 
   if (!src) {
     return { src: "", srcSet: undefined as string | undefined };
@@ -230,7 +256,7 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
 
   return (payload?.data?.slides ?? [])
     .map((slide) => {
-      const image = strapiResponsiveImage(slide.image);
+      const image = strapiResponsiveImage(slide.image, { srcWidth: 2560 });
       return {
         src: image.src,
         srcSet: image.srcSet,
@@ -255,7 +281,7 @@ export async function fetchKacheln(): Promise<KachelnContent | null> {
 
   const colors = (payload.data.colors ?? [])
     .map((tile) => {
-      const image = strapiResponsiveImage(tile.image);
+      const image = strapiResponsiveImage(tile.image, { srcWidth: 1600 });
       return {
         title: tile.title?.trim() || "",
         href: tile.href?.trim() || "#kacheln",
@@ -288,7 +314,7 @@ export async function fetchEntdecken(): Promise<EntdeckenContent | null> {
 
   const panels = (payload?.data?.panels ?? [])
     .map((panel) => {
-      const image = strapiResponsiveImage(panel.image);
+      const image = strapiResponsiveImage(panel.image, { srcWidth: 1600 });
       return {
         title: panel.title?.trim() || "",
         subtitle: panel.subtitle?.trim() || "",
@@ -385,7 +411,7 @@ function mapHeaderMenus(menus: StrapiHeaderMenu[]): MenuPanel[] {
       const fallback = fallbackByLabel.get(label);
       const teasers = (menu.teasers ?? [])
         .map((teaser) => {
-          const image = strapiResponsiveImage(teaser.image);
+          const image = strapiResponsiveImage(teaser.image, { srcWidth: 1200 });
           return {
             href: teaser.url?.trim() || "#",
             image: image.src,
