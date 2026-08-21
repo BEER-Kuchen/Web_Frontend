@@ -52,6 +52,17 @@ export type EntdeckenContent = {
   panels: EntdeckenPanel[];
 };
 
+export type FaqItem = {
+  question: string;
+  answer: string;
+};
+
+export type FaqContent = {
+  eyebrow: string;
+  title: string;
+  items: FaqItem[];
+};
+
 type StrapiFormat = {
   url?: string;
   width?: number;
@@ -106,6 +117,19 @@ type StrapiDiscoverPanel = {
 type StrapiEntdeckenResponse = {
   data?: {
     panels?: StrapiDiscoverPanel[];
+  };
+};
+
+type StrapiFaqItem = {
+  question?: string;
+  answer?: string;
+};
+
+type StrapiFaqResponse = {
+  data?: {
+    eyebrow?: string;
+    title?: string;
+    items?: StrapiFaqItem[];
   };
 };
 
@@ -334,14 +358,42 @@ export async function fetchEntdecken(): Promise<EntdeckenContent | null> {
   return { panels };
 }
 
+export async function fetchFaq(): Promise<FaqContent | null> {
+  const payload = await strapiGet<StrapiFaqResponse>("/api/faq", {
+    populate: "items",
+  });
+
+  if (!payload?.data) {
+    return null;
+  }
+
+  const items = (payload.data.items ?? [])
+    .map((item) => ({
+      question: item.question?.trim() || "",
+      answer: item.answer?.trim() || "",
+    }))
+    .filter((item) => item.question && item.answer);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return {
+    eyebrow: payload.data.eyebrow?.trim() || "Fragen",
+    title: payload.data.title?.trim() || "Bevor wir uns sehen",
+    items,
+  };
+}
+
 export async function fetchHomeCms() {
-  const [heroSlides, kacheln, entdecken] = await Promise.all([
+  const [heroSlides, kacheln, entdecken, faq] = await Promise.all([
     fetchHeroSlides(),
     fetchKacheln(),
     fetchEntdecken(),
+    fetchFaq(),
   ]);
 
-  return { heroSlides, kacheln, entdecken };
+  return { heroSlides, kacheln, entdecken, faq };
 }
 
 export type HeaderCms = {

@@ -10,7 +10,7 @@ import { fetchHomeCms } from "@/lib/strapi";
 export const revalidate = 120;
 
 export default async function Home() {
-  const { heroSlides, kacheln, entdecken } = await fetchHomeCms();
+  const { heroSlides, kacheln, entdecken, faq } = await fetchHomeCms();
 
   return (
     <main className="bg-paper">
@@ -19,7 +19,7 @@ export default async function Home() {
       <UspBar />
       <Process />
       <Entdecken content={entdecken} />
-      <Faq />
+      <Faq content={faq} />
       <LeadCta />
     </main>
   );
