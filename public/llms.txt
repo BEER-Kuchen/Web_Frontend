@@ -6,9 +6,8 @@ BEER GmbH plant und fertigt Küchen und Möbel nach Maß. Die Website zeigt Küc
 
 ## Seiten
 
-- [/](/): Startseite mit Küchenstilen, Manufaktur, Entdecken und FAQ
+- [/](/): Startseite mit Küchenstilen, Ablauf, Entdecken und FAQ
 - [/#kacheln](/#kacheln): Küchenfarben und Stile (weiß, salbeigrün, schwarz)
-- [/#manufaktur](/#manufaktur): Manufaktur, Materialien und Möbel nach Maß
 - [/#ablauf](/#ablauf): Ablauf von der Beratung bis zur Montage
 - [/#beratung](/#beratung): Unverbindliche Beratungsanfrage
 

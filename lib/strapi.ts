@@ -63,6 +63,44 @@ export type FaqContent = {
   items: FaqItem[];
 };
 
+export type ProcessIcon = "consult" | "plan" | "factory" | "handover";
+
+export type ProcessContent = {
+  eyebrow: string;
+  title: string;
+  buttonLabel: string;
+  buttonHref: string;
+  steps: {
+    step: string;
+    title: string;
+    description: string;
+    icon: ProcessIcon;
+  }[];
+};
+
+export type BeratungContent = {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  company: string;
+  street: string;
+  city: string;
+  phoneLabel: string;
+  phoneHref: string;
+  email: string;
+};
+
+export type HomeCms = {
+  title?: string;
+  slug?: string;
+  heroSlides: HeroSlide[];
+  kacheln: KachelnContent | null;
+  entdecken: EntdeckenContent | null;
+  faq: FaqContent | null;
+  ablauf: ProcessContent | null;
+  beratung: BeratungContent | null;
+};
+
 type StrapiFormat = {
   url?: string;
   width?: number;
@@ -83,26 +121,12 @@ type StrapiHeroSlide = {
   image?: StrapiMedia;
 };
 
-type StrapiHeroResponse = {
-  data?: {
-    slides?: StrapiHeroSlide[];
-  };
-};
-
 type StrapiColorTile = {
   title?: string;
   href?: string;
   alt?: string;
   color?: string;
   image?: StrapiMedia;
-};
-
-type StrapiKachelnResponse = {
-  data?: {
-    eyebrow?: string;
-    intro?: string;
-    colors?: StrapiColorTile[];
-  };
 };
 
 type StrapiDiscoverPanel = {
@@ -114,23 +138,53 @@ type StrapiDiscoverPanel = {
   image?: StrapiMedia;
 };
 
-type StrapiEntdeckenResponse = {
-  data?: {
-    panels?: StrapiDiscoverPanel[];
-  };
-};
-
 type StrapiFaqItem = {
   question?: string;
   answer?: string;
 };
 
-type StrapiFaqResponse = {
-  data?: {
+type StrapiLandingEntry = {
+  title?: string;
+  slug?: string;
+  hero?: { slides?: StrapiHeroSlide[] };
+  kacheln?: {
+    eyebrow?: string;
+    intro?: string;
+    colors?: StrapiColorTile[];
+  };
+  ablauf?: {
+    eyebrow?: string;
+    title?: string;
+    buttonLabel?: string;
+    buttonHref?: string;
+    steps?: {
+      step?: string;
+      title?: string;
+      description?: string;
+      icon?: string;
+    }[];
+  };
+  entdecken?: { panels?: StrapiDiscoverPanel[] };
+  faq?: {
     eyebrow?: string;
     title?: string;
     items?: StrapiFaqItem[];
   };
+  beratung?: {
+    eyebrow?: string;
+    title?: string;
+    intro?: string;
+    company?: string;
+    street?: string;
+    city?: string;
+    phoneLabel?: string;
+    phoneHref?: string;
+    email?: string;
+  };
+};
+
+type StrapiLandingResponse = {
+  data?: StrapiLandingEntry | StrapiLandingEntry[] | null;
 };
 
 type ImageSize = "large" | "medium" | "small" | "original";
@@ -273,12 +327,12 @@ async function strapiGet<T>(path: string, query: Record<string, string>) {
   }
 }
 
-export async function fetchHeroSlides(): Promise<HeroSlide[]> {
-  const payload = await strapiGet<StrapiHeroResponse>("/api/hero", {
-    "populate[slides][populate]": "image",
-  });
+function isHexColor(value: string) {
+  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value);
+}
 
-  return (payload?.data?.slides ?? [])
+function mapHeroSlides(slides?: StrapiHeroSlide[]): HeroSlide[] {
+  return (slides ?? [])
     .map((slide) => {
       const image = strapiResponsiveImage(slide.image, { srcWidth: 2560 });
       return {
@@ -290,20 +344,16 @@ export async function fetchHeroSlides(): Promise<HeroSlide[]> {
     .filter((slide) => slide.src);
 }
 
-function isHexColor(value: string) {
-  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value);
-}
-
-export async function fetchKacheln(): Promise<KachelnContent | null> {
-  const payload = await strapiGet<StrapiKachelnResponse>("/api/kacheln", {
-    "populate[colors][populate]": "image",
-  });
-
-  if (!payload?.data) {
+function mapKachelnContent(data?: {
+  eyebrow?: string;
+  intro?: string;
+  colors?: StrapiColorTile[];
+} | null): KachelnContent | null {
+  if (!data) {
     return null;
   }
 
-  const colors = (payload.data.colors ?? [])
+  const colors = (data.colors ?? [])
     .map((tile) => {
       const image = strapiResponsiveImage(tile.image, { srcWidth: 1600 });
       return {
@@ -322,21 +372,18 @@ export async function fetchKacheln(): Promise<KachelnContent | null> {
   }
 
   return {
-    eyebrow:
-      payload.data.eyebrow?.trim() || "Die Kacheln · Geteilte Bildtafeln",
+    eyebrow: data.eyebrow?.trim() || "Die Kacheln · Geteilte Bildtafeln",
     intro:
-      payload.data.intro?.trim() ||
+      data.intro?.trim() ||
       "Keine Liste – Tafeln. Zur Hälfte das Projekt, zur Hälfte Material und Farbe. So wird die Wahl der Küchenfarbe zum Erlebnis.",
     colors,
   };
 }
 
-export async function fetchEntdecken(): Promise<EntdeckenContent | null> {
-  const payload = await strapiGet<StrapiEntdeckenResponse>("/api/entdecken", {
-    "populate[panels][populate]": "image",
-  });
-
-  const panels = (payload?.data?.panels ?? [])
+function mapEntdeckenContent(
+  panels?: StrapiDiscoverPanel[],
+): EntdeckenContent | null {
+  const mapped = (panels ?? [])
     .map((panel) => {
       const image = strapiResponsiveImage(panel.image, { srcWidth: 1600 });
       return {
@@ -351,23 +398,19 @@ export async function fetchEntdecken(): Promise<EntdeckenContent | null> {
     })
     .filter((panel) => panel.title && panel.subtitle);
 
-  if (panels.length === 0) {
-    return null;
-  }
-
-  return { panels };
+  return mapped.length > 0 ? { panels: mapped } : null;
 }
 
-export async function fetchFaq(): Promise<FaqContent | null> {
-  const payload = await strapiGet<StrapiFaqResponse>("/api/faq", {
-    populate: "items",
-  });
-
-  if (!payload?.data) {
+function mapFaqContent(data?: {
+  eyebrow?: string;
+  title?: string;
+  items?: StrapiFaqItem[];
+} | null): FaqContent | null {
+  if (!data) {
     return null;
   }
 
-  const items = (payload.data.items ?? [])
+  const items = (data.items ?? [])
     .map((item) => ({
       question: item.question?.trim() || "",
       answer: item.answer?.trim() || "",
@@ -379,21 +422,155 @@ export async function fetchFaq(): Promise<FaqContent | null> {
   }
 
   return {
-    eyebrow: payload.data.eyebrow?.trim() || "Fragen",
-    title: payload.data.title?.trim() || "Bevor wir uns sehen",
+    eyebrow: data.eyebrow?.trim() || "Fragen",
+    title: data.title?.trim() || "Bevor wir uns sehen",
     items,
   };
 }
 
-export async function fetchHomeCms() {
-  const [heroSlides, kacheln, entdecken, faq] = await Promise.all([
-    fetchHeroSlides(),
-    fetchKacheln(),
-    fetchEntdecken(),
-    fetchFaq(),
-  ]);
+const PROCESS_ICONS: ProcessIcon[] = ["consult", "plan", "factory", "handover"];
 
-  return { heroSlides, kacheln, entdecken, faq };
+function mapProcessContent(data?: {
+  eyebrow?: string;
+  title?: string;
+  buttonLabel?: string;
+  buttonHref?: string;
+  steps?: {
+    step?: string;
+    title?: string;
+    description?: string;
+    icon?: string;
+  }[];
+} | null): ProcessContent | null {
+  if (!data) {
+    return null;
+  }
+
+  const steps = (data.steps ?? [])
+    .map((item) => ({
+      step: item.step?.trim() || "",
+      title: item.title?.trim() || "",
+      description: item.description?.trim() || "",
+      icon: PROCESS_ICONS.includes(item.icon as ProcessIcon)
+        ? (item.icon as ProcessIcon)
+        : "consult",
+    }))
+    .filter((item) => item.step && item.title && item.description);
+
+  if (steps.length === 0) {
+    return null;
+  }
+
+  return {
+    eyebrow: data.eyebrow?.trim() || "Der Weg zur Küche",
+    title: data.title?.trim() || "Von der ersten Idee bis zur Übergabe",
+    buttonLabel: data.buttonLabel?.trim() || "Entdecken",
+    buttonHref: data.buttonHref?.trim() || "#ablauf",
+    steps,
+  };
+}
+
+function mapBeratungContent(data?: {
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  company?: string;
+  street?: string;
+  city?: string;
+  phoneLabel?: string;
+  phoneHref?: string;
+  email?: string;
+} | null): BeratungContent | null {
+  if (!data?.title?.trim() || !data.intro?.trim()) {
+    return null;
+  }
+
+  return {
+    eyebrow: data.eyebrow?.trim() || "Persönliche Beratung",
+    title: data.title.trim(),
+    intro: data.intro.trim(),
+    company: data.company?.trim() || "BEER GmbH",
+    street: data.street?.trim() || "Badendorf 6",
+    city: data.city?.trim() || "85395 Wolfersdorf",
+    phoneLabel: data.phoneLabel?.trim() || "T 08168 909910",
+    phoneHref: data.phoneHref?.trim() || "tel:+498168909910",
+    email: data.email?.trim() || "beratung@beer-kuechenmanufaktur.de",
+  };
+}
+
+async function fetchLandingPage(slug = "home"): Promise<HomeCms | null> {
+  const payload = await strapiGet<StrapiLandingResponse>("/api/landings", {
+    "filters[slug][$eq]": slug,
+    "populate[hero][populate][slides][populate]": "image",
+    "populate[kacheln][populate][colors][populate]": "image",
+    "populate[entdecken][populate][panels][populate]": "image",
+    "populate[ablauf][populate]": "steps",
+    "populate[faq][populate]": "items",
+    "populate[beratung]": "true",
+  });
+  const entry = Array.isArray(payload?.data) ? payload.data[0] : payload?.data;
+
+  if (!entry) {
+    return null;
+  }
+
+  const heroSlides = mapHeroSlides(entry.hero?.slides);
+  const kacheln = mapKachelnContent(entry.kacheln);
+  const entdecken = mapEntdeckenContent(entry.entdecken?.panels);
+  const faq = mapFaqContent(entry.faq);
+  const ablauf = mapProcessContent(entry.ablauf);
+  const beratung = mapBeratungContent(entry.beratung);
+
+  if (
+    !heroSlides.length &&
+    !kacheln &&
+    !entdecken &&
+    !faq &&
+    !ablauf &&
+    !beratung
+  ) {
+    return {
+      title: entry.title?.trim(),
+      slug: entry.slug?.trim(),
+      heroSlides: [],
+      kacheln: null,
+      entdecken: null,
+      faq: null,
+      ablauf: null,
+      beratung: null,
+    };
+  }
+
+  return {
+    title: entry.title?.trim(),
+    slug: entry.slug?.trim(),
+    heroSlides,
+    kacheln,
+    entdecken,
+    faq,
+    ablauf,
+    beratung,
+  };
+}
+
+export async function fetchLandingBySlug(slug: string) {
+  return fetchLandingPage(slug);
+}
+
+export async function fetchHomeCms(): Promise<HomeCms> {
+  const landing = await fetchLandingPage();
+  if (landing) {
+    return landing;
+  }
+
+  return {
+    heroSlides: [],
+    kacheln: null,
+    entdecken: null,
+    faq: null,
+    ablauf: null,
+    beratung: null,
+  };
 }
 
 export type HeaderCms = {
@@ -439,6 +616,7 @@ type StrapiHeaderEntry = {
   logoAlt?: string;
   ctaLabel?: string;
   ctaUrl?: string;
+  menus?: StrapiHeaderMenu[];
 };
 
 function slugify(value: string) {
@@ -500,19 +678,17 @@ function mapHeaderMenus(menus: StrapiHeaderMenu[]): MenuPanel[] {
 }
 
 export async function fetchHeader(): Promise<HeaderCms | null> {
-  const [headerPayload, menuPayload] = await Promise.all([
-    strapiGet<{ data?: StrapiHeaderEntry[] }>("/api/headers", {
-      populate: "logo",
-    }),
-    strapiGet<{ data?: StrapiHeaderMenu[] }>("/api/header-menus", {
-      sort: "order:asc",
-      "populate[groups][populate]": "links",
-      "populate[teasers][populate]": "image",
-    }),
-  ]);
+  const headerPayload = await strapiGet<{ data?: StrapiHeaderEntry }>(
+    "/api/header",
+    {
+      "populate[logo]": "true",
+      "populate[menus][populate][groups][populate]": "links",
+      "populate[menus][populate][teasers][populate]": "image",
+    },
+  );
 
-  const header = headerPayload?.data?.[0];
-  const panels = mapHeaderMenus(menuPayload?.data ?? []);
+  const header = headerPayload?.data;
+  const panels = mapHeaderMenus(header?.menus ?? []);
 
   if (!header && panels.length === 0) {
     return null;

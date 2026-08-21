@@ -37,17 +37,17 @@ export const footerColumns: FooterSection[] = [
   {
     title: "Marken & Möbel",
     links: [
-      { href: "#manufaktur", label: "Bora" },
-      { href: "#manufaktur", label: "Miele" },
-      { href: "#manufaktur", label: "Gaggenau" },
-      { href: "#manufaktur", label: "Quooker" },
+      { href: "#ablauf", label: "Bora" },
+      { href: "#ablauf", label: "Miele" },
+      { href: "#ablauf", label: "Gaggenau" },
+      { href: "#ablauf", label: "Quooker" },
     ],
     extraTitle: "Möbel nach Maß",
     extraLinks: [
-      { href: "#manufaktur", label: "Einbauschränke" },
-      { href: "#manufaktur", label: "Begehbare Kleiderschränke" },
-      { href: "#manufaktur", label: "Tische & Bänke" },
-      { href: "#manufaktur", label: "Wohnmöbel" },
+      { href: "#ablauf", label: "Einbauschränke" },
+      { href: "#ablauf", label: "Begehbare Kleiderschränke" },
+      { href: "#ablauf", label: "Tische & Bänke" },
+      { href: "#ablauf", label: "Wohnmöbel" },
     ],
   },
   {
@@ -87,12 +87,12 @@ export const footerColumns: FooterSection[] = [
   {
     title: "Unternehmen",
     links: [
-      { href: "#manufaktur", label: "Über BEER" },
-      { href: "#manufaktur", label: "Team" },
+      { href: "#ablauf", label: "Über BEER" },
+      { href: "#ablauf", label: "Team" },
       { href: "#kacheln", label: "Alle Projekte" },
-      { href: "#manufaktur", label: "Nachhaltigkeit" },
+      { href: "#ablauf", label: "Nachhaltigkeit" },
       { href: "#beratung", label: "Karriere" },
-      { href: "#manufaktur", label: "Presse" },
+      { href: "#ablauf", label: "Presse" },
     ],
   },
   {

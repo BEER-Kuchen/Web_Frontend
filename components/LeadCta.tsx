@@ -3,8 +3,28 @@
 import type { FormEvent } from "react";
 import Pill from "@/components/Pill";
 import TextLink from "@/components/TextLink";
+import type { BeratungContent } from "@/lib/strapi";
 
-export default function LeadCta() {
+const fallback: BeratungContent = {
+  eyebrow: "Persönliche Beratung",
+  title: "Vereinbare deine persönliche Beratung",
+  intro:
+    "Erzählen Sie uns von Ihrem Raum, Ihrem Alltag und Ihren Wünschen. Wir vereinbaren einen Termin in der Ausstellung oder bei Ihnen vor Ort.",
+  company: "BEER GmbH",
+  street: "Badendorf 6",
+  city: "85395 Wolfersdorf",
+  phoneLabel: "T 08168 909910",
+  phoneHref: "tel:+498168909910",
+  email: "beratung@beer-kuechenmanufaktur.de",
+};
+
+export default function LeadCta({
+  content,
+}: {
+  content: BeratungContent | null;
+}) {
+  const data = content ?? fallback;
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -26,33 +46,24 @@ export default function LeadCta() {
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 py-24 md:py-32 lg:grid-cols-12 lg:gap-20">
         <div className="lg:col-span-5">
-          <p className="type-eyebrow mb-3 text-paper">
-            Persönliche Beratung
-          </p>
+          <p className="type-eyebrow mb-3 text-paper">{data.eyebrow}</p>
           <h2 id="beratung-heading" className="type-h2 text-paper">
-            Vereinbare deine persönliche Beratung
+            {data.title}
           </h2>
-          <p className="type-intro mt-6 max-w-md text-white/70">
-            Erzählen Sie uns von Ihrem Raum, Ihrem Alltag und Ihren Wünschen.
-            Wir vereinbaren einen Termin in der Ausstellung oder bei Ihnen vor
-            Ort.
-          </p>
+          <p className="type-intro mt-6 max-w-md text-white/70">{data.intro}</p>
 
           <address className="type-body mt-12 text-white/70 not-italic">
-            <p className="type-eyebrow text-white">BEER GmbH</p>
-            <p className="mt-3">Badendorf 6</p>
-            <p>85395 Wolfersdorf</p>
+            <p className="type-eyebrow text-white">{data.company}</p>
+            <p className="mt-3">{data.street}</p>
+            <p>{data.city}</p>
             <p className="mt-4">
-              <TextLink href="tel:+498168909910" tone="dark">
-                T 08168 909910
+              <TextLink href={data.phoneHref} tone="dark">
+                {data.phoneLabel}
               </TextLink>
             </p>
             <p className="mt-2">
-              <TextLink
-                href="mailto:beratung@beer-kuechenmanufaktur.de"
-                tone="dark"
-              >
-                beratung@beer-kuechenmanufaktur.de
+              <TextLink href={`mailto:${data.email}`} tone="dark">
+                {data.email}
               </TextLink>
             </p>
           </address>
