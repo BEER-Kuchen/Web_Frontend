@@ -42,7 +42,7 @@ const fallback: EntdeckenContent = {
 function PanelCard({ panel }: { panel: EntdeckenPanel }) {
   return (
     <li>
-      <article className="group relative flex aspect-[4/3] min-h-[22rem] items-center justify-center overflow-hidden bg-nacht sm:min-h-[26rem] lg:min-h-[32rem]">
+      <article className="group relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-nacht md:aspect-[16/10]">
         {panel.image ? (
           <CmsImage
             src={panel.image}
@@ -50,13 +50,13 @@ function PanelCard({ panel }: { panel: EntdeckenPanel }) {
             alt={panel.alt || panel.title}
             fill
             loading="lazy"
-            sizes="(max-width: 640px) 100vw, (max-width: 1440px) 50vw, 720px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1152px) 50vw, 560px"
             className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         ) : null}
         <div className="absolute inset-0 bg-nacht/45" />
-        <div className="relative z-10 flex max-w-lg flex-col items-center px-6 py-12 text-center md:px-10 md:py-16">
-          <h3 className="font-serif text-[32px] leading-[1.12] font-medium tracking-[-0.02em] text-paper md:text-[36px] lg:text-[42px]">
+        <div className="relative z-10 flex max-w-md flex-col items-center px-6 py-10 text-center md:px-8">
+          <h3 className="font-serif text-[28px] leading-[1.12] font-medium tracking-[-0.02em] text-paper md:text-[32px] lg:text-[36px]">
             {panel.title}
           </h3>
           <p className="type-body mt-3 text-paper/90">{panel.subtitle}</p>
@@ -84,7 +84,7 @@ export default function Entdecken({
       aria-label="Küchenwelten entdecken"
     >
       <h2 className="sr-only">Küchenwelten entdecken</h2>
-      <ul className="mx-auto grid max-w-[90rem] grid-cols-1 gap-5 px-6 py-16 sm:grid-cols-2 md:gap-8 md:px-8 md:py-24 lg:px-10">
+      <ul className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-6 py-16 sm:grid-cols-2 md:gap-6 md:py-24">
         {panels.map((panel, index) => (
           <PanelCard key={`${panel.title}-${index}`} panel={panel} />
         ))}
