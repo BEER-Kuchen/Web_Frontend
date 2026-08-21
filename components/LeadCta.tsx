@@ -59,17 +59,26 @@ export default function LeadCta() {
         </div>
 
         <form
+          toolname="request_consultation"
+          tooldescription="Sendet eine unverbindliche Beratungsanfrage an die BEER Küchenmanufaktur in Wolfersdorf. Verwende dieses Formular, wenn der Nutzer eine Küchen- oder Möbelberatung vereinbaren möchte."
           onSubmit={handleSubmit}
           className="space-y-5 lg:col-span-7"
           noValidate
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Field label="Name" name="name" type="text" autoComplete="name" />
+            <Field
+              label="Name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              toolparamdescription="Vollständiger Name der anfragenden Person"
+            />
             <Field
               label="E-Mail"
               name="email"
               type="email"
               autoComplete="email"
+              toolparamdescription="E-Mail-Adresse für die Rückmeldung zur Beratung"
             />
           </div>
           <Field
@@ -77,6 +86,7 @@ export default function LeadCta() {
             name="phone"
             type="tel"
             autoComplete="tel"
+            toolparamdescription="Telefonnummer für die Terminabstimmung"
           />
           <label className="block">
             <span className="type-eyebrow mb-2 block text-white/55">
@@ -85,6 +95,7 @@ export default function LeadCta() {
             <textarea
               name="message"
               rows={5}
+              toolparamdescription="Raum, Zeitrahmen, Küchenstil und erste Wünsche"
               className="type-body w-full resize-y border border-white/20 bg-transparent px-4 py-3 text-white outline-none transition-colors placeholder:text-white/30 focus:border-white"
               placeholder="Raum, Zeitrahmen, erste Ideen…"
             />
@@ -103,11 +114,13 @@ function Field({
   name,
   type,
   autoComplete,
+  toolparamdescription,
 }: {
   label: string;
   name: string;
   type: "text" | "email" | "tel";
   autoComplete: string;
+  toolparamdescription: string;
 }) {
   return (
     <label className="block">
@@ -116,6 +129,7 @@ function Field({
         name={name}
         type={type}
         autoComplete={autoComplete}
+        toolparamdescription={toolparamdescription}
         className="type-body w-full border border-white/20 bg-transparent px-4 py-3 text-white outline-none transition-colors placeholder:text-white/30 focus:border-white"
       />
     </label>

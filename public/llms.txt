@@ -1,0 +1,19 @@
+# BEER Küchenmanufaktur
+
+> Individuelle Manufakturküchen und Möbel nach Maß aus Wolfersdorf bei Freising. Beratung, Planung, Fertigung und Montage aus einer Hand.
+
+BEER GmbH plant und fertigt Küchen und Möbel nach Maß. Die Website zeigt Küchenstile, den Manufaktur-Ablauf und ein Formular für eine persönliche Beratung.
+
+## Seiten
+
+- [/](/): Startseite mit Küchenstilen, Manufaktur, Entdecken und FAQ
+- [/#kacheln](/#kacheln): Küchenfarben und Stile (weiß, salbeigrün, schwarz)
+- [/#manufaktur](/#manufaktur): Manufaktur, Materialien und Möbel nach Maß
+- [/#ablauf](/#ablauf): Ablauf von der Beratung bis zur Montage
+- [/#beratung](/#beratung): Unverbindliche Beratungsanfrage
+
+## Kontakt
+
+- [Telefon +49 8168 909910](tel:+498168909910): Ausstellung und Beratung
+- [beratung@beer-kuechenmanufaktur.de](mailto:beratung@beer-kuechenmanufaktur.de): E-Mail für Planungsanfragen
+- Adresse: Badendorf 6, 85395 Wolfersdorf

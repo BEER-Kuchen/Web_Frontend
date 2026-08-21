@@ -155,17 +155,14 @@ export function strapiImageUrl(
   return strapiMediaUrl(url);
 }
 
-export function strapiResponsiveImage(image?: StrapiMedia | null) {
-  const src = strapiImageUrl(image, "large") || strapiMediaUrl(image?.url);
-  if (!src) {
-    return { src: "", srcSet: undefined as string | undefined };
-  }
+const MAX_SRCSET_WIDTH = 1920;
 
+export function strapiResponsiveImage(image?: StrapiMedia | null) {
   const candidates: { url: string; width: number }[] = [];
   const add = (url?: string, width?: number, fallbackWidth?: number) => {
     const mapped = strapiMediaUrl(url);
     const resolvedWidth = width || fallbackWidth;
-    if (!mapped || !resolvedWidth) {
+    if (!mapped || !resolvedWidth || resolvedWidth > MAX_SRCSET_WIDTH) {
       return;
     }
     if (candidates.some((item) => item.url === mapped)) {
@@ -177,9 +174,18 @@ export function strapiResponsiveImage(image?: StrapiMedia | null) {
   add(image?.formats?.small?.url, image?.formats?.small?.width, 500);
   add(image?.formats?.medium?.url, image?.formats?.medium?.width, 750);
   add(image?.formats?.large?.url, image?.formats?.large?.width, 1000);
-  add(image?.url, image?.width, 2400);
+  add(image?.url, image?.width);
 
   candidates.sort((left, right) => left.width - right.width);
+
+  const src =
+    strapiImageUrl(image, "large") ||
+    candidates.at(-1)?.url ||
+    "";
+
+  if (!src) {
+    return { src: "", srcSet: undefined as string | undefined };
+  }
 
   return {
     src,
@@ -382,7 +388,7 @@ function mapHeaderMenus(menus: StrapiHeaderMenu[]): MenuPanel[] {
           const image = strapiResponsiveImage(teaser.image);
           return {
             href: teaser.url?.trim() || "#",
-            image: strapiMediaUrl(teaser.image?.url) || image.src,
+            image: image.src,
             srcSet: image.srcSet,
             caption: teaser.caption?.trim() || "",
             alt: teaser.alt?.trim() || teaser.caption?.trim() || "",
